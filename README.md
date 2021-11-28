@@ -11,7 +11,7 @@ Six Switch MX Layout
  * Case Type: Sandwich
  * USB Cutout: On
    * Location: 0 (default)
-   * Width: 10 (default)
+   * Width: 12
  * Mount Holes: 4, 3, 8
  * Edge Padding: On, 10,10,10,10 (W,N,E,S)
  * Plate Corners: On, 4
