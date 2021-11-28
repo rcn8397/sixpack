@@ -24,7 +24,7 @@ cut_l  = 675.565; // mm Cut path length
 // HiLetGo Pro Micro Clone
 // https://www.amazon.com/gp/product/B01MTU9GOB/ref=ppx_yo_dt_b_asin_title_o00_s01?ie=UTF8&psc=1
 // Item Dimensions
-promicro_d = 33.50;
+promicro_d = 34.00;
 promicro_w = 18.50; // 18.04 ish
 promicro_h = 4.00;
 promicro_pad = 1.0;
@@ -74,12 +74,13 @@ if( ( fname == "open.dxf") || ( fname == "closed.dxf" ) ){
         translate([0,0,1])
             promicro();
     }
+    if( 0 ){
     difference(){
         svg( fname, h );
         translate( [ case_x/4, case_y/4, 3 ] )
             #pushbtn();
     }
-
+    }
  } else {
     svg(fname, h );
  }
