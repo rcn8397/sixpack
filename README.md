@@ -40,8 +40,13 @@ On Ubuntu 18.04 I needed to stop the ModemManger service to communicate with tty
  * https://wiki.ai03.com/books/pcb-design/chapter/pcb-designer-guide
  * https://matt3o.com/hand-wiring-a-custom-keyboard/
 
+## QMK
+ * https://docs.qmk.fm/#/
+
 ## Promicro
+ * https://deskthority.net/wiki/Arduino_Pro_Micro#Pinout
  * https://golem.hu/guide/pro-micro-upgrade/
+ * https://learn.sparkfun.com/tutorials/pro-micro--fio-v3-hookup-guide/troubleshooting-and-faq#ts-reset
 
 ## Atmega32u4 Data sheet
 
