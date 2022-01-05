@@ -21,6 +21,14 @@ Six Switch MX Layout
  * Line Color: Off
  * Line Weight: Off
 
+# QMK
+## Promicro
+### Linux
+On Ubuntu 18.04 I needed to stop the ModemManger service to communicate with ttyACM0 serial device. 
+
+    sudo systemctl stop ModemManager.service
+    sudo systemctl disable ModemManager.service
+
 # Resources
  * https://www.youtube.com/watch?v=IKe_hrvYH1M
  * http://www.keyboard-layout-editor.com/
