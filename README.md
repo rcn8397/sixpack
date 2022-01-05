@@ -22,18 +22,26 @@ Six Switch MX Layout
  * Line Weight: Off
 
 # QMK
-## Promicro
-### Linux
+## Setup
+## Flashing
+### Linux Issues
 On Ubuntu 18.04 I needed to stop the ModemManger service to communicate with ttyACM0 serial device. 
 
     sudo systemctl stop ModemManager.service
     sudo systemctl disable ModemManager.service
+    
+ ## Customization
+ TODO
 
 # Resources
  * https://www.youtube.com/watch?v=IKe_hrvYH1M
  * http://www.keyboard-layout-editor.com/
  * http://builder.swillkb.com/
  * https://wiki.ai03.com/books/pcb-design/chapter/pcb-designer-guide
+ * https://matt3o.com/hand-wiring-a-custom-keyboard/
+
+## Promicro
+ * https://golem.hu/guide/pro-micro-upgrade/
 
 ## Atmega32u4 Data sheet
 
