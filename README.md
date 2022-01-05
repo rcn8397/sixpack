@@ -42,6 +42,7 @@ On Ubuntu 18.04 I needed to stop the ModemManger service to communicate with tty
 
 ## QMK
  * https://docs.qmk.fm/#/
+ * https://docs.qmk.fm/#/hand_wire
 
 ## Promicro
  * https://deskthority.net/wiki/Arduino_Pro_Micro#Pinout
