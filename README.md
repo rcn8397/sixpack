@@ -21,6 +21,18 @@ Six Switch MX Layout
  * Line Color: Off
  * Line Weight: Off
 
+## 3D Printing
+The plate and case are also hosted on prusaprinters.org https://www.prusaprinters.org/prints/113097-sixpack
+
+### Openscad
+Each layer can be generated/customized using openscads customizer. 
+
+### Slicing
+I use Cura to slice, but I suspect any slicer will work. 
+Nozzle: 0.4mm
+Layer Height: 0.2mm
+Supports: No
+
 # QMK
 ## Setup
 ## Compiling
