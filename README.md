@@ -23,7 +23,16 @@ Six Switch MX Layout
 
 # QMK
 ## Setup
+## Compiling
+Compile the code using QMK
+
+     qmk compile -kb handwired/sixpack  -km default
+     
 ## Flashing
+Flash the target (ProMicro), note you must hit the reset switch to enter bootloader.
+
+     qmk flash -kb handwired/sixpack  -km default
+     
 ### Linux Issues
 On Ubuntu 18.04 I needed to stop the ModemManger service to communicate with ttyACM0 serial device. 
 
@@ -43,6 +52,28 @@ On Ubuntu 18.04 I needed to stop the ModemManger service to communicate with tty
 ## QMK
  * https://docs.qmk.fm/#/
  * https://docs.qmk.fm/#/hand_wire
+ * Sixpack firmware (QMK forked) https://github.com/rcn8397/qmk_firmware/tree/personal/nordeen%2Fsixpack
+ * Work flow https://docs.qmk.fm/#/newbs_git_using_your_master_branch
+
+### QMK Git Workflow/Setup
+Add the forked repo as a remote
+
+      git remote add myfork git@github.com:rcn8397/qmk_firmware.git
+      
+Next verify the forked repo was added
+
+      git remote -v
+      
+Should look something like:
+
+      myfork	git@github.com:rcn8397/qmk_firmware.git (fetch)
+      myfork	git@github.com:rcn8397/qmk_firmware.git (push)
+      origin	https://github.com/qmk/qmk_firmware.git (fetch)
+      origin	https://github.com/qmk/qmk_firmware.git (push)
+      
+Next push the development branch to the fork and track it.
+
+      git push -u myfork
 
 ## Promicro
  * https://deskthority.net/wiki/Arduino_Pro_Micro#Pinout
