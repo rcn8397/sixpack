@@ -19,6 +19,7 @@ solder_pad_d = 1.5;
 solder_pad_h = 2;
 
 include_solder_pads = true;
+use_hulled_pads     = true;
 
 ///< Modules
 module pcb(h = pcb_h, d = pcb_d){
@@ -56,6 +57,18 @@ module solder_pads_mirrored(){
          solder_pads();
 }
 
+module hulled_pads(){
+    hull(){
+        solder_pads();
+    }
+}
+
+module hulled_pads_mirrored(){
+    hulled_pads();
+     mirror([1,0,0])
+         hulled_pads();
+}
+
 module neo_pixel(h=pcb_h, d=pcb_d ){
      ///< Assembly of the led and pcb_pad
      union(){
@@ -64,6 +77,11 @@ module neo_pixel(h=pcb_h, d=pcb_d ){
           }
      if( include_solder_pads ){
          solder_pads_mirrored();
+         if( use_hulled_pads ){
+             hulled_pads_mirrored();
+         } else {
+             solder_pads_mirrored();
+         }
      }
 }
 
@@ -138,24 +156,6 @@ module pixel_iter( num_pixels = 1, lpad = 2, rpad = 0, z_offset = 0.9 ){
         x = lpad+(i * pcb_d)+(i * rpad)+(i * lpad);
         translate([x, 0, 0 ])
             neo_pixel();
-
-
-
-        
-//        translate([x-pcb_d/4, -pcb_d/4, (-pcb_h/2)-z_offset])
-//        mirror([1,0,0])
-//                #cube([1/2.5*pcb_d, pcb_d/2, pcb_h] );
-//        translate([x+pcb_d/4, -pcb_d/4, (-pcb_h/2)-z_offset])
-//                #cube([1/2.5*pcb_d, pcb_d/2, pcb_h] );
-
-//        y = x-pcb_d/2;
-//        translate([y, -pcb_d/4, (-pcb_h/2)-z_offset])
-//            #cube([1/2.5*pcb_d, pcb_d/2, pcb_h] );
-//        n = x+pcb_d/8;
-//        translate([n, -pcb_d/4, (-pcb_h/2)-z_offset])
-//            #cube([1/2.5*pcb_d, pcb_d/2, pcb_h] );
-
-
     }
 }
 
@@ -193,5 +193,6 @@ module pixel_strip(){
 ///< Remove this when including
 //neoclip();
 
-neo_pixel();
+//neo_pixel();
 
+pixel_strip();
