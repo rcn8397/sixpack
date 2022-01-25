@@ -193,33 +193,44 @@ module pixel_iter( num_pixels = 1, pad = 1, tol = 0.55  ){
 
 ///< Calculate the cubes width given N pixels with a P pad and T tolerance
 function cube_w( n = 1, p = 1, t = 0.5 ) = ( ( (n+1)*p ) + (n*pcb_d) + (t*n-1));
-module cube_iter( num_pixels = 1, pad = 1, tol = 0.5 ){
-    //< Sled
+module cube_iter( num_pixels = 1, pad = 1, tol = 0.5, channeled = true ){
+    //< Cube that acts as the housing for the led
     cube_d = pcb_d+pad*2;
-    cube_h = package_h+pad*2;
+    cube_h = package_h+pad;
     w = cube_w(num_pixels, pad, tol );
     translate([ w/2, 0, 0] ){
-        color("lime")cube([w, cube_d, cube_h], center=true );
+        difference(){
+            color("lime")cube([w, cube_d, cube_h], center=true );
+            if( channeled ){
+                translate( [0,0,pad] )
+                    #cube( [ w , pcb_d/2, package_h ],center=true );
+            }
+        }
     }
 }
 
-module pixel_strip(num_pixels = 3, pad = 1, lpad = 1, rpad = 1, tol = 0.5 ){
+module pixel_strip(
+                   num_pixels   = 3,
+                   pad          = 1,
+                   lpad         = 1,
+                   lpad_channel = true,
+                   rpad         = 1,
+                   rpad_channel = true,
+                   tol          = 0.5
+                   ){
     lpad_w = cube_w( lpad, pad, tol );
     mpad_w = cube_w( num_pixels+lpad, pad, tol );
     rpad_w = cube_w( num_pixels+lpad+rpad, pad, tol );
 
-    cube_iter( lpad, pad, tol );
+    cube_iter( lpad, pad, tol, lpad_channel );
     translate( [ lpad_w, 0, 0 ] ){
         difference(){
-            cube_iter( num_pixels, pad, tol );
+            cube_iter( num_pixels, pad, tol, channeled = true );
             pixel_iter( num_pixels, pad = pad, tol );
-            channel_cut = ((num_pixels+1)*pad) + (num_pixels*pcb_d)+(tol*num_pixels-1); 
-            translate([channel_cut/2,0,pad])
-                #cube( [ channel_cut , pcb_d/2, package_h ],center=true );
         }
     }
     translate( [mpad_w, 0, 0 ])
-        cube_iter( rpad, pad, tol );
+        cube_iter( rpad, pad, tol, rpad_channel );
 }
 
 module pixel_channel_1u( t = 1 ){
