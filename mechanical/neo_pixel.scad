@@ -2,8 +2,13 @@
 
 
 ///< Parameters - Begin
+$fn = 60;
+
+///< Package size
 led_assembly_h = 2.8;
 led_assembly_d = 9.6;
+package_h = 2.8;
+package_d = 9.6;
 
 ///< Diameter of the PCB 
 pcb_d = 9.6;
@@ -16,10 +21,13 @@ led_h = led_assembly_h - pcb_h;
 
 solder_pad_w = 2.5;
 solder_pad_d = 1.5;
-solder_pad_h = 2;
+solder_pad_h = 10;
+
+num_leds = 3;
 
 include_solder_pads = true;
 use_hulled_pads     = true;
+use_all_pads_hulled = false;
 
 ///< Modules
 module pcb(h = pcb_h, d = pcb_d){
@@ -69,6 +77,10 @@ module hulled_pads_mirrored(){
          hulled_pads();
 }
 
+module all_pads_hulled(){
+    hull(){ hulled_pads_mirrored(); }
+}
+
 module neo_pixel(h=pcb_h, d=pcb_d ){
      ///< Assembly of the led and pcb_pad
      union(){
@@ -78,7 +90,11 @@ module neo_pixel(h=pcb_h, d=pcb_d ){
      if( include_solder_pads ){
          solder_pads_mirrored();
          if( use_hulled_pads ){
-             hulled_pads_mirrored();
+             if( use_all_pads_hulled ){
+                 all_pads_hulled();
+             } else {
+                 hulled_pads_mirrored();
+             }
          } else {
              solder_pads_mirrored();
          }
@@ -150,49 +166,98 @@ module neoclip( lead_d = 1, rot = 0, foot_h = 1, tol = 0.25 ){
     }
 }
 
-module pixel_iter( num_pixels = 1, lpad = 2, rpad = 0, z_offset = 0.9 ){
+
+module padding( p = 1 ){
+    w = p;
+    d = pcb_d+p*2;
+    h = package_h;
+    color("cyan")cube([w,d,h], center = true );
+}
+
+module pixel_iter( num_pixels = 1, pad = 1, tol = 0.55  ){
     //< PCBs
-    for( i = [ 0 : num_pixels-1 ] ){
-        x = lpad+(i * pcb_d)+(i * rpad)+(i * lpad);
-        translate([x, 0, 0 ])
-            neo_pixel();
-    }
-}
+    cylinder_d = pcb_d+tol;
+    cylinder_h = package_h;
 
-module cube_iter( num_cubes = 1, lpad = 2, rpad = 0, z_offset = 0.1, dir = 1) {
-    //< Sled 
-    for( i = [ 0 : num_cubes-1 ] ){
-        x = lpad+(i * pcb_d)+(i * rpad)+(i * lpad);
-        cube_w = pcb_d;
-        cube_d = pcb_d;
-        cube_h = pcb_h;
-        translate([ -cube_w/2, -cube_d/2, ((-pcb_h/2)-z_offset)*dir ] )
-            color("lime")cube([x+pcb_d, pcb_d, pcb_h], false );
-    }
-}
-
-module pixel_sled_bottom(num_pixels = 1, lpad = 2, rpad = 1, z_offset = 0.1){
-        cube_iter( num_pixels,  lpad, rpad, z_offset, dir = 1 );
-}
-
-module pixel_sled_top( num_pixels = 1, lpad = 2, rpad = 1, z_offset = 0.1 ){
-        cube_iter( num_pixels,  lpad, rpad, z_offset, dir = -1 );
-}
-
-module pixel_strip(){
-    difference(){
-        union(){
-            pixel_sled_bottom(2, lpad = 2, rpad = 2);
-            //translate([0.5,0,0] ) pixel_sled_top(2, lpad = 2, rpad=1);
+    origin = pad/2 + cylinder_d/2;
+    translate([origin,0,0] ){
+        for( i = [ 0 : num_pixels-1 ] ){
+            x = (i * (pad + cylinder_d) );
+            translate([x, 0, pad ])
+                cylinder( h = cylinder_h, d = cylinder_d, center = true );
+            translate([x, 0, 0 ])
+                neo_pixel();
         }
-        pixel_iter( 2 );
     }
 }
 
+///< Calculate the cubes width given N pixels with a P pad and T tolerance
+function cube_w( n = 1, p = 1, t = 0.5 ) = ( ( (n+1)*p ) + (n*pcb_d) + (t*n-1));
+module cube_iter( num_pixels = 1, pad = 1, tol = 0.5 ){
+    //< Sled
+    cube_d = pcb_d+pad*2;
+    cube_h = package_h+pad*2;
+    w = cube_w(num_pixels, pad, tol );
+    translate([ w/2, 0, 0] ){
+        color("lime")cube([w, cube_d, cube_h], center=true );
+    }
+}
+
+module pixel_strip(num_pixels = 3, pad = 1, lpad = 1, rpad = 1, tol = 0.5 ){
+    lpad_w = cube_w( lpad, pad, tol );
+    mpad_w = cube_w( num_pixels+lpad, pad, tol );
+    rpad_w = cube_w( num_pixels+lpad+rpad, pad, tol );
+
+    cube_iter( lpad, pad, tol );
+    translate( [ lpad_w, 0, 0 ] ){
+        difference(){
+            cube_iter( num_pixels, pad, tol );
+            pixel_iter( num_pixels, pad = pad, tol );
+            channel_cut = ((num_pixels+1)*pad) + (num_pixels*pcb_d)+(tol*num_pixels-1); 
+            translate([channel_cut/2,0,pad])
+                #cube( [ channel_cut , pcb_d/2, package_h ],center=true );
+        }
+    }
+    translate( [mpad_w, 0, 0 ])
+        cube_iter( rpad, pad, tol );
+}
+
+module pixel_channel_1u( t = 1 ){
+    difference(){
+        ///< Outer cube
+        translate([0,pcb_d/2, 0])
+            cube([ (2*t)+pcb_d, pcb_d, package_h + (2*t) ], center = true );
+        ///< LED cut
+        translate([0,0,package_h-(2*t)])
+            cube([led_w, 1000, led_h+(2*t)], center = true );
+        ///< PCB cut
+        cube([ pcb_d+1, 1000, pcb_h+1], center = true );
+        ///< Solder/wire cut
+        translate([0,0,-solder_pad_h/2])
+            cube([ solder_pad_w*2+2, 1000, solder_pad_h], center = true );
+        ///< Debug cut
+        translate([0,pcb_d/2, 0 ] )
+            #neo_pixel();
+    }
+}
+
+module channel_iter( num_pixels = 1, t = 1 ){
+    for( i = [ 0 : num_pixels-1 ] ){
+        y = ( i * pcb_d );
+        translate([ 0, y, 0 ] )
+            pixel_channel_1u( t = t );
+    }
+}
 ///< Build object
 ///< Remove this when including
 //neoclip();
 
 //neo_pixel();
 
-pixel_strip();
+pixel_strip(num_leds);
+
+//channel_iter( 2 );
+
+
+
+
