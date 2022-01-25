@@ -21,13 +21,21 @@ led_h = led_assembly_h - pcb_h;
 
 solder_pad_w = 2.5;
 solder_pad_d = 1.5;
-solder_pad_h = 10;
+solder_pad_h = 50; //< Large as the value isn't passed into neopixel
 
 num_leds = 3;
+padding  = 1;
+left_padding = 1;
+right_padding = 1;
+lpad_channeled = true;
+rpad_channeled = true;
+tolerance      = 0.5;
+
 
 include_solder_pads = true;
 use_hulled_pads     = true;
 use_all_pads_hulled = false;
+use_as_jig          = false;
 
 ///< Modules
 module pcb(h = pcb_h, d = pcb_d){
@@ -139,7 +147,6 @@ module neoclip( lead_d = 1, rot = 0, foot_h = 1, tol = 0.25 ){
         //cube([ led_h-0.1, pcb_d+led_w+tol, pcb_d ],center=true);
         cube([ led_h-0.1, pcb_d, pcb_d ],center=true);
     }
-
     module foot(){
         x=pcb_h*2+lead_d+led_h-0.1;
         y=pcb_d+led_w+tol;
@@ -147,7 +154,6 @@ module neoclip( lead_d = 1, rot = 0, foot_h = 1, tol = 0.25 ){
             translate([-lead_d/2,0,-foot_h/2])
             cube([ x, y, foot_h ],center=true);
     }
-
     module three_posts(include_foot=true){
             front_post();
             translate([-pcb_h-lead_d,0,0])
@@ -157,7 +163,6 @@ module neoclip( lead_d = 1, rot = 0, foot_h = 1, tol = 0.25 ){
                     foot();
             }
     }
-    
     difference(){
         rotate([0,0,rot]){
             three_posts();
@@ -167,17 +172,10 @@ module neoclip( lead_d = 1, rot = 0, foot_h = 1, tol = 0.25 ){
 }
 
 
-module padding( p = 1 ){
-    w = p;
-    d = pcb_d+p*2;
-    h = package_h;
-    color("cyan")cube([w,d,h], center = true );
-}
-
-module pixel_iter( num_pixels = 1, pad = 1, tol = 0.55  ){
+module pixel_iter( num_pixels = 1, pad = 1, tol = 0.55, jig_h = 0 ){
     //< PCBs
     cylinder_d = pcb_d+tol;
-    cylinder_h = package_h;
+    cylinder_h = package_h+jig_h;
 
     origin = pad/2 + cylinder_d/2;
     translate([origin,0,0] ){
@@ -216,7 +214,8 @@ module pixel_strip(
                    lpad_channel = true,
                    rpad         = 1,
                    rpad_channel = true,
-                   tol          = 0.5
+                   tol          = 0.5,
+                   is_jig       = false,
                    ){
     lpad_w = cube_w( lpad, pad, tol );
     mpad_w = cube_w( num_pixels+lpad, pad, tol );
@@ -226,7 +225,11 @@ module pixel_strip(
     translate( [ lpad_w, 0, 0 ] ){
         difference(){
             cube_iter( num_pixels, pad, tol, channeled = true );
-            pixel_iter( num_pixels, pad = pad, tol );
+            if( is_jig ){
+                #pixel_iter( num_pixels, pad = pad, tol, jig_h = package_h+2*pad );
+            } else {
+                #pixel_iter( num_pixels, pad = pad, tol );
+            }
         }
     }
     translate( [mpad_w, 0, 0 ])
@@ -265,7 +268,16 @@ module channel_iter( num_pixels = 1, t = 1 ){
 
 //neo_pixel();
 
-pixel_strip(num_leds);
+pixel_strip(
+            num_pixels   = num_leds,
+            pad          = padding,
+            lpad         = left_padding,
+            lpad_channel = lpad_channeled,
+            rpad         = right_padding,
+            rpad_channel = rpad_channeled,
+            tol          = tolerance,
+            is_jig       = use_as_jig,
+            );
 
 //channel_iter( 2 );
 
