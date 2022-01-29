@@ -1,14 +1,19 @@
-///< Alitovo Neo pixel RGB X000UCVKBH 2812b-1-LED-WH
-
+///< LED Layer
+///< Layer is specific to the Alitove Neo Pixel
+///< Alitove Neo pixel RGB X000UCVKBH 2812b-1-LED-WH
+///< https://www.amazon.com/ALITOVE-100pcs-WS2812B-Addressable-Arduino/dp/B01D1FFVOA
 
 ///< Parameters - Begin
 $fn = 60;
 
+///< Parameters after this are hidden from the customizer
+module __Customizer_Limit__(){}
+
 ///< Package size
 led_assembly_h = 2.8;
 led_assembly_d = 9.6;
-package_h = 2.8;
-package_d = 9.6;
+package_h      = 2.8;
+package_d      = 9.6;
 
 ///< Diameter of the PCB 
 pcb_d = 9.6;
@@ -21,16 +26,15 @@ led_h = led_assembly_h - pcb_h;
 
 solder_pad_w = 2.5;
 solder_pad_d = 1.5;
-solder_pad_h = 50; //< Large as the value isn't passed into neopixel
+solder_pad_h = 5; //< Large value used to create cuts
 
-num_leds = 3;
-padding  = 1;
-left_padding = 1;
-right_padding = 1;
+num_leds       = 4;
+padding        = 1;
+left_padding   = 1;
+right_padding  = 1;
 lpad_channeled = true;
 rpad_channeled = true;
 tolerance      = 0.5;
-
 
 include_solder_pads = true;
 use_hulled_pads     = true;
@@ -174,11 +178,13 @@ module pixel_strip(
         cube_iter( rpad, pad, tol, rpad_channel );
 }
 
-///< Build object
-///< Remove this when including
+module dxf( f, height ){
+    echo( "DXF: ", f, "Height: ", height );
+    linear_extrude( height )
+        import( f );
+}
 
-//neo_pixel();
-
+module sixpack_pixel_strip(){
 pixel_strip(
             num_pixels   = num_leds,
             pad          = padding,
@@ -189,6 +195,15 @@ pixel_strip(
             tol          = tolerance,
             is_jig       = use_as_jig,
             );
+}
 
+module led_layer(){
+    dxf( "closed.dxf", package_h+padding );
+    translate([pcb_d/2,14,(package_h+padding)/2])
+        sixpack_pixel_strip();
+    translate([pcb_d/2,45,(package_h+padding)/2])
+        sixpack_pixel_strip();
+}
 
-
+///< Build object
+led_layer();
