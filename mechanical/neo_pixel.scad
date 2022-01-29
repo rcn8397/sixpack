@@ -109,69 +109,6 @@ module neo_pixel(h=pcb_h, d=pcb_d ){
      }
 }
 
-module pixel_clip_v1(lead_d = 1, foot_t = 2){
-    width = pcb_d/2+pcb_d/2+led_w;
-    zmag  = (led_h+lead_d/2);
-    module retainer_qrt(){
-        translate([pcb_d/2,0,0])
-            cube( [ pcb_d/2, pcb_d,led_h ], center=true );
-        translate([-pcb_d/2,0,0])
-            cube( [pcb_d/2, pcb_d, led_h ], center=true );
-    }
-    translate([0,0,pcb_h])
-        retainer_qrt();
-    translate([0,0,-zmag ])
-        retainer_qrt();
-
-    translate([-width/2,-pcb_d/2-foot_t/2,-zmag-led_h/2 ])
-        color("red")cube([width, foot_t, led_h+lead_d/2+led_h+pcb_h]);
-}
-
-module neoclip( lead_d = 1, rot = 0, foot_h = 1, tol = 0.25 ){
-    post_dim = [led_h-0.1, pcb_d/2, pcb_d];
-    
-    module retainer_post(){
-        translate([pcb_h,pcb_d/2+tol,0])
-            cube( post_dim, center=true);   
-    }
-    module z_axis_pixel(){
-    rotate_about_pt( rot , 90, [0,0,0])
-        neo_pixel();
-    }
-    module front_post(){
-        retainer_post();
-        mirror([0,1,0])
-            retainer_post();
-    }
-    module back_post(){
-        //cube([ led_h-0.1, pcb_d+led_w+tol, pcb_d ],center=true);
-        cube([ led_h-0.1, pcb_d, pcb_d ],center=true);
-    }
-    module foot(){
-        x=pcb_h*2+lead_d+led_h-0.1;
-        y=pcb_d+led_w+tol;
-        color("pink")
-            translate([-lead_d/2,0,-foot_h/2])
-            cube([ x, y, foot_h ],center=true);
-    }
-    module three_posts(include_foot=true){
-            front_post();
-            translate([-pcb_h-lead_d,0,0])
-                back_post();
-            if( include_foot ){
-                translate([0,0,-pcb_d/2])
-                    foot();
-            }
-    }
-    difference(){
-        rotate([0,0,rot]){
-            three_posts();
-        }
-        #z_axis_pixel();
-    }
-}
-
-
 module pixel_iter( num_pixels = 1, pad = 1, tol = 0.55, jig_h = 0 ){
     //< PCBs
     cylinder_d = pcb_d+tol;
@@ -191,6 +128,7 @@ module pixel_iter( num_pixels = 1, pad = 1, tol = 0.55, jig_h = 0 ){
 
 ///< Calculate the cubes width given N pixels with a P pad and T tolerance
 function cube_w( n = 1, p = 1, t = 0.5 ) = ( ( (n+1)*p ) + (n*pcb_d) + (t*n-1));
+
 module cube_iter( num_pixels = 1, pad = 1, tol = 0.5, channeled = true ){
     //< Cube that acts as the housing for the led
     cube_d = pcb_d+pad*2;
@@ -236,35 +174,8 @@ module pixel_strip(
         cube_iter( rpad, pad, tol, rpad_channel );
 }
 
-module pixel_channel_1u( t = 1 ){
-    difference(){
-        ///< Outer cube
-        translate([0,pcb_d/2, 0])
-            cube([ (2*t)+pcb_d, pcb_d, package_h + (2*t) ], center = true );
-        ///< LED cut
-        translate([0,0,package_h-(2*t)])
-            cube([led_w, 1000, led_h+(2*t)], center = true );
-        ///< PCB cut
-        cube([ pcb_d+1, 1000, pcb_h+1], center = true );
-        ///< Solder/wire cut
-        translate([0,0,-solder_pad_h/2])
-            cube([ solder_pad_w*2+2, 1000, solder_pad_h], center = true );
-        ///< Debug cut
-        translate([0,pcb_d/2, 0 ] )
-            #neo_pixel();
-    }
-}
-
-module channel_iter( num_pixels = 1, t = 1 ){
-    for( i = [ 0 : num_pixels-1 ] ){
-        y = ( i * pcb_d );
-        translate([ 0, y, 0 ] )
-            pixel_channel_1u( t = t );
-    }
-}
 ///< Build object
 ///< Remove this when including
-//neoclip();
 
 //neo_pixel();
 
@@ -278,9 +189,6 @@ pixel_strip(
             tol          = tolerance,
             is_jig       = use_as_jig,
             );
-
-//channel_iter( 2 );
-
 
 
 
