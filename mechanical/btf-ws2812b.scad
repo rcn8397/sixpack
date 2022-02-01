@@ -57,9 +57,6 @@ module strip( n = num_leds, pitch = 1, center = true ){
 
 ///< Build object
 
-
-dxf( "closed.dxf", height = strip_h );
-translate([13, 14, 0 ] )
-strip(num_leds, led_pitch);
-translate([13, 45, 0 ] )
-strip(num_leds, led_pitch);
+dxf( "closed.dxf", height = 2.13 );
+translate([15, 14.35, 2.13/2 ] )strip(num_leds, led_pitch);
+translate([15, 44.47, 2.13/2 ] )strip(num_leds, led_pitch);
