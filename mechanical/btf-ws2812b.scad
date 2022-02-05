@@ -16,10 +16,16 @@ Parameters
 $fn = 90; // [0:90:120]
 
 // Number of LEDs in the strip
-num_leds  = 4; // [0:1:72]
+num_leds  = 6; // [0:1:72]
 
 // Pitch of the LEDs
 led_pitch = 1.92; // [0:0.01:25]
+
+// Channel thickness
+channel_t = 1.0; // [0:1:5]
+// Channel X
+channel_x = 22; // [0:0.1:50]
+
 
 ///< Parameters after this are hidden from the customizer
 module __Customizer_Limit__(){}
@@ -32,6 +38,7 @@ ws2812b_h = 1.57;
 // Strip Width
 strip_d = 12;   // [0:0.01:15]
 strip_h = 2.13 - ws2812b_h; // [0:0.01:5]
+
 
 ///< Modules
 module ws2812b(center = true){
@@ -55,8 +62,32 @@ module strip( n = num_leds, pitch = 1, center = true ){
         color("black")cube( [ strip_w, strip_d, strip_h ], center = center );
 }
 
+module channel( n = num_leds, pitch = 1, thickness = channel_t, center = true ){
+    d = strip_d + thickness;
+    for( i = [0:n-1] ){
+        x = i * ( pitch + ws2812b_w );
+        translate( [x,d/2,-thickness/2] )
+            cylinder( h = ws2812b_h+thickness, d = ws2812b_w/2, center );
+        translate( [x,-d/2,-thickness/2] )
+            cylinder( h = ws2812b_h+thickness, d = ws2812b_w/2, center );
+
+    }
+    channel_w = ribbon_w( n, pitch );
+    adjust = channel_w/2 - ws2812b_w;
+    translate( [ adjust, 0, 0 ] )
+        color("cyan")cube( [ channel_w, d, thickness ], center );
+    
+}
 ///< Build object
 
-dxf( "closed.dxf", height = 2.13 );
-translate([15, 14.35, 2.13/2 ] )strip(num_leds, led_pitch);
-translate([15, 44.47, 2.13/2 ] )strip(num_leds, led_pitch);
+dxf( "closed.dxf", height = 2.13+channel_t );
+
+difference(){
+translate([channel_x, 44.47, channel_t/2 ] )channel( num_leds, led_pitch );
+#translate([channel_x, 44.47, 2.13/2+channel_t ] )strip(num_leds, led_pitch);
+}
+
+difference(){
+translate([channel_x, 14.35, channel_t/2 ] )channel( num_leds, led_pitch );
+#translate([channel_x, 14.35, 2.13/2+channel_t ] )strip(num_leds, led_pitch);
+}
